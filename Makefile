@@ -2,7 +2,8 @@ BUILD=go build
 LDFLAGS=-X main.buildType=debug
 DATE=$(shell date '+%s')
 GOARCH=$(shell go env GOARCH)
-OUT=$(shell basename $(PWD))
+GOOS=$(shell go env GOOS)
+OUT=$(shell pwd)/$(shell basename $(PWD))
 
 ## Text coloring & styling
 BOLD=\033[1m
@@ -17,7 +18,7 @@ RESET=\033[m
 
 .PHONY: release amd64
 
-all: release build
+all: build
 
 l: lint
 lint:
@@ -32,7 +33,7 @@ release:
 b: build
 build: clean
 	$(eval LDFLAGS=${LDFLAGS} -X main.buildVersion=${DATE})
-	@printf "${GREEN}${HEADER}Compiling for ${GOARCH}-${GOOS} to a file called '${OUT}'${RESET}\n"
+	@printf "${GREEN}${HEADER}Compiling for ${GOARCH}-${GOOS} to '${OUT}'${RESET}\n"
 	${BUILD} -p 1 -ldflags="${LDFLAGS}" -o ${OUT}
 clean:
 	@printf "${GREEN}${HEADER}Cleaning previous build${RESET}\n"

@@ -1,8 +1,8 @@
 package main
 
 type queen struct {
-	y int
 	x int
+	y int
 }
 
 func newQueen(x, y int) *queen {
