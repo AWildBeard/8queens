@@ -100,56 +100,56 @@ func (board *chessboard) attack(attackingQueen *queen) (attackedQueens []*queen)
 	}
 
 	// Check horizontal left
-	for xIndex := attackingQueen.x - 1/* skip the attacker */; xIndex > 0 ; xIndex-- {
+	for xIndex := attackingQueen.x - 1; /* skip the attacker */ xIndex > 0; xIndex-- {
 		if checkAndAddQueen(xIndex, attackingQueen.y) {
 			break
 		}
 	}
 
 	// Check horizontal right
-	for xIndex := attackingQueen.x + 1/* skip the attacker */; xIndex <= ChessMaxX ; xIndex++ {
+	for xIndex := attackingQueen.x + 1; /* skip the attacker */ xIndex <= ChessMaxX; xIndex++ {
 		if checkAndAddQueen(xIndex, attackingQueen.y) {
 			break
 		}
 	}
 
 	// Check vertical down
-	for yIndex := attackingQueen.y-1/* skip the attacker */; yIndex > 0; yIndex-- {
+	for yIndex := attackingQueen.y - 1; /* skip the attacker */ yIndex > 0; yIndex-- {
 		if checkAndAddQueen(attackingQueen.x, yIndex) {
 			break
 		}
 	}
 
 	// Check vertical up
-	for yIndex := attackingQueen.y+1/* skip the attacker */; yIndex <= ChessMaxY; yIndex++ {
+	for yIndex := attackingQueen.y + 1; /* skip the attacker */ yIndex <= ChessMaxY; yIndex++ {
 		if checkAndAddQueen(attackingQueen.x, yIndex) {
 			break
 		}
 	}
 
 	// Check Diagonal to Top Left
-	for xIndex, yIndex := attackingQueen.x - 1, attackingQueen.y + 1; xIndex > 0 && yIndex <= ChessMaxY; xIndex, yIndex = xIndex - 1, yIndex + 1 {
+	for xIndex, yIndex := attackingQueen.x-1, attackingQueen.y+1; xIndex > 0 && yIndex <= ChessMaxY; xIndex, yIndex = xIndex-1, yIndex+1 {
 		if checkAndAddQueen(xIndex, yIndex) {
 			break
 		}
 	}
 
 	// Check Diagonal to Bottom Right
-	for xIndex, yIndex := attackingQueen.x + 1, attackingQueen.y - 1; xIndex <= ChessMaxX && yIndex > 0; xIndex, yIndex = xIndex + 1, yIndex - 1 {
+	for xIndex, yIndex := attackingQueen.x+1, attackingQueen.y-1; xIndex <= ChessMaxX && yIndex > 0; xIndex, yIndex = xIndex+1, yIndex-1 {
 		if checkAndAddQueen(xIndex, yIndex) {
 			break
 		}
 	}
 
 	// Check Diagonal to Top Right
-	for xIndex, yIndex := attackingQueen.x + 1, attackingQueen.y + 1; xIndex <= ChessMaxX && yIndex <= ChessMaxY; xIndex, yIndex = xIndex + 1, yIndex + 1 {
+	for xIndex, yIndex := attackingQueen.x+1, attackingQueen.y+1; xIndex <= ChessMaxX && yIndex <= ChessMaxY; xIndex, yIndex = xIndex+1, yIndex+1 {
 		if checkAndAddQueen(xIndex, yIndex) {
 			break
 		}
 	}
 
 	// Check Diagonal to Bottom Left
-	for xIndex, yIndex := attackingQueen.x - 1, attackingQueen.y - 1; xIndex > 0 && yIndex > 0; xIndex, yIndex = xIndex - 1, yIndex - 1 {
+	for xIndex, yIndex := attackingQueen.x-1, attackingQueen.y-1; xIndex > 0 && yIndex > 0; xIndex, yIndex = xIndex-1, yIndex-1 {
 		if checkAndAddQueen(xIndex, yIndex) {
 			break
 		}
@@ -196,9 +196,11 @@ func (board *chessboard) print(output io.Writer) {
 			currentForeground = blackForeground
 		}
 	}
+
 	fmt.Fprint(output, "  ")
 	for i := 1; i < 9; i++ {
 		fmt.Fprintf(output, " %d ", i)
 	}
+
 	fmt.Fprintln(output)
 }
