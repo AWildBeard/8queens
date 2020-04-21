@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"math/rand"
 )
 
 const (
@@ -14,6 +15,8 @@ const (
 
 type chessboard struct {
 	board [ChessMaxX][ChessMaxY]byte
+	queens []*queen
+	fitness int
 }
 
 func newChessboard() *chessboard {
@@ -23,6 +26,31 @@ func newChessboard() *chessboard {
 			board.board[row][index] = EMPTY
 		}
 	}
+
+	board.queens = make([]*queen, 0)
+
+	return board
+}
+
+// newRandomChessboard creates a chessboard with ChessMaxX queens 
+// in unique columns. It guarantees that only ChessMaxX queens
+func newRandomChessboard() *chessboard {
+	board := &chessboard{}
+	board.queens = make([]*queen, 0)
+
+	for column := 0 ; column < ChessMaxX ; column++ {
+		randomRowLocation := rand.Intn(ChessMaxY)
+		for row := 0 ; row < ChessMaxY ; row++ {
+			if row == randomRowLocation {
+				board.board[column][row] = QUEEN
+				board.queens = append(board.queens, newQueen(column+1, row+1))
+			} else {
+				board.board[column][row] = EMPTY
+			}
+		}
+	}
+
+	board.fitness = board.numAttacks()
 
 	return board
 }
@@ -68,6 +96,7 @@ func (board *chessboard) placeQueen(queen *queen) (err error) {
 	}
 
 	board.board[queen.x-1][queen.y-1] = QUEEN
+	board.queens = append(board.queens, queen)
 	return
 }
 
@@ -78,7 +107,23 @@ func (board *chessboard) removeQueen(queen *queen) (err error) {
 	}
 
 	board.board[queen.x-1][queen.y-1] = EMPTY
+	for index, boardQueen := range board.queens {
+		if *queen == *boardQueen {
+			board.queens[index] = board.queens[len(board.queens) - 1]
+			board.queens = board.queens[:len(board.queens) - 1]
+		}
+	}
 	return
+}
+
+func (board *chessboard) numAttacks() int {
+	numAttacks := 0
+
+	for _, queen := range board.queens {
+		numAttacks += len(board.attack(queen))
+	}
+
+	return numAttacks
 }
 
 func (board *chessboard) attack(attackingQueen *queen) (attackedQueens []*queen) {
@@ -93,7 +138,7 @@ func (board *chessboard) attack(attackingQueen *queen) (attackedQueens []*queen)
 			attackedQueens = append(attackedQueens, candidateQueen)
 			return true
 		} else if err != nil {
-			panic(err)
+			panic(err) // Panic if bounds are exceeded/ unknown error
 		}
 
 		return false
@@ -169,6 +214,16 @@ func (board *chessboard) print(output io.Writer) {
 	currentBackground := whiteBackground
 	currentForeground := blackForeground
 
+	rotateColors := func() {
+		if currentBackground == whiteBackground {
+			currentBackground = blackBackground
+			currentForeground = whiteForeground
+		} else {
+			currentBackground = whiteBackground
+			currentForeground = blackForeground
+		}
+	}
+
 	fmt.Fprintln(output)
 	for column := ChessMaxX - 1; column >= 0; column-- {
 		fmt.Fprintf(output, "%d|", column+1)
@@ -178,23 +233,11 @@ func (board *chessboard) print(output io.Writer) {
 			fmt.Fprintf(output, "%s%c", currentForeground, board.board[row][column])
 			fmt.Fprintf(output, "%s ", currentBackground)
 
-			if currentBackground == whiteBackground {
-				currentBackground = blackBackground
-				currentForeground = whiteForeground
-			} else {
-				currentBackground = whiteBackground
-				currentForeground = blackForeground
-			}
+			rotateColors()
 		}
 		fmt.Fprintln(output, "\033[m|")
 
-		if currentBackground == whiteBackground {
-			currentBackground = blackBackground
-			currentForeground = whiteForeground
-		} else {
-			currentBackground = whiteBackground
-			currentForeground = blackForeground
-		}
+		rotateColors()
 	}
 
 	fmt.Fprint(output, "  ")

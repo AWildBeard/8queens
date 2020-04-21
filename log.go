@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	logPrefix = "bs/util"
+	logPrefix = "8queens "
 )
 
 var (

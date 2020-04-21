@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"math/rand"
 	"os"
+	"time"
 )
 
 var (
@@ -10,33 +12,32 @@ var (
 	buildType    string
 
 	printVersion bool
+	seed int64
+	popSize int
 )
 
 func init() {
 	flag.BoolVar(&printVersion, "v", false, "print version information and exit")
+	flag.Int64Var(&seed, "seed", time.Now().UnixNano(), "allows specifying a custom seed for all random number generation operations")
+	flag.IntVar(&popSize, "pops", 64, "allows specifying the population size to perform the genetic search upon")
 }
 
 func main() {
 	flag.Parse()
+
+	EnableLogging(os.Stdout)
+
+	l.Printf("Seeding random number generator with %v\n", seed)
+	rand.Seed(seed)
+
 	if printVersion {
-		EnableLogging(os.Stdout)
 		l.Printf("%s-%s", buildType, buildVersion)
 		return
 	}
 
-	logfile, err := os.OpenFile("8queens.log", os.O_TRUNC|os.O_CREATE|os.O_APPEND, 0660)
-	if err != nil {
-		panic(err)
+	population := newPopulation(popSize)
+	if candidate := population.genticSearch(); candidate != nil {
+		l.Printf("Solution found:")
+		candidate.print(os.Stdout)
 	}
-	defer logfile.Close()
-
-	EnableLogging(logfile)
-
-	chessboard := newChessboard()
-	queen := newQueen(1, 6)
-	if err := chessboard.placeQueen(queen); err != nil {
-		panic(err)
-	}
-
-	chessboard.print(os.Stdout)
 }
