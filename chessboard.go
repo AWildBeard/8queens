@@ -7,18 +7,39 @@ import (
 )
 
 const (
+	/* ChessMaxX controls most of the bounding in the
+	 * X direction for this program
+	 */
 	ChessMaxX = 8
+
+	/* ChessMaxY controls most of the bounding in the
+	 * Y direction for this program
+	 */
 	ChessMaxY = 8
+
+	// QUEEN is a constant to represent a queen on a chessboard
 	QUEEN     = 'Q'
+
+	// EMPTY is a constant to represent an empty space on a chessbaord
 	EMPTY     = ' '
 )
 
+/* struct chessboard is the data container that
+ * holds all chessboard related information including
+ * the data for the boards visualization
+ * a list of all queens on the board
+ * and the fitness of the board as reported by
+ * board.numAttacks
+ */
 type chessboard struct {
 	board [ChessMaxX][ChessMaxY]byte
 	queens []*queen
 	fitness int
 }
 
+/* newChessboard returns a empty chessboard instance
+ * @returns an empty chessboard
+ */
 func newChessboard() *chessboard {
 	board := &chessboard{}
 	for row := 0; row < ChessMaxY; row++ {
@@ -32,8 +53,11 @@ func newChessboard() *chessboard {
 	return board
 }
 
-// newRandomChessboard creates a chessboard with ChessMaxX queens 
-// in unique columns. It guarantees that only ChessMaxX queens
+/* newRandomChessboard creates a chessboard with ChessMaxX queens 
+ * in unique columns. It guarantees that only ChessMaxX queens will
+ * be generated and placed on the board, each in their own unique X column
+ * @returns a chessboard full of 8 queens in random positions
+ */
 func newRandomChessboard() *chessboard {
 	board := &chessboard{}
 	board.queens = make([]*queen, 0)
@@ -55,6 +79,10 @@ func newRandomChessboard() *chessboard {
 	return board
 }
 
+/* isInBounds is a utility function to determin if a queen
+ * is valid given our global constances of ChessMaxX and ChessMaxY
+ * @returns an error when the queen is out of bounds
+ */
 func isInBounds(queen *queen) error {
 	if queen.x > ChessMaxX || queen.y > ChessMaxX || queen.x < 1 || queen.y < 1 {
 		return newInvalidBoardLocationError(queen.x, queen.y)
@@ -63,6 +91,11 @@ func isInBounds(queen *queen) error {
 	return nil
 }
 
+/* isTaken returns and error if the queens passed is at a location
+ * that is already taken on the board
+ * @param queen the queen to be checked
+ * @returns an error dictating if the position is taken, or if the queen passed is invalid
+ */
 func (board *chessboard) isTaken(queen *queen) (err error) {
 	err = isInBounds(queen)
 	if err != nil {
@@ -76,6 +109,10 @@ func (board *chessboard) isTaken(queen *queen) (err error) {
 	return
 }
 
+/* isEmpty returns an error if the passed queen is at a location that is empty
+ * @param queen the queen that needs to be checked against
+ * @returns an error dictating if the position is empty or if the queen passed is invalid
+ */
 func (board *chessboard) isEmpty(queen *queen) (err error) {
 	err = isInBounds(queen)
 	if err != nil {
@@ -89,6 +126,10 @@ func (board *chessboard) isEmpty(queen *queen) (err error) {
 	return
 }
 
+/* placeQueen places a given queen on the given chessboard
+ * @param queen the queen to be placed on the chessboard
+ * @returns error if the passed queen is invalid
+ */
 func (board *chessboard) placeQueen(queen *queen) (err error) {
 	err = board.isTaken(queen)
 	if err != nil {
@@ -100,6 +141,11 @@ func (board *chessboard) placeQueen(queen *queen) (err error) {
 	return
 }
 
+/* removeQueen removes a queen on the chessboard represented by the
+ * passed queen if it exists
+ * @param queen the queen to be removed from the chessboard
+ * @returns error if the passed queen is invalid
+ */
 func (board *chessboard) removeQueen(queen *queen) (err error) {
 	err = board.isEmpty(queen)
 	if err != nil {
@@ -116,6 +162,10 @@ func (board *chessboard) removeQueen(queen *queen) (err error) {
 	return
 }
 
+/* numAttacks returns the number of queens that would attack each other if all
+ * queens began attacking each other.
+ * @returns the number of queens that would attack each other if all queens started attacking
+ */
 func (board *chessboard) numAttacks() int {
 	numAttacks := 0
 
@@ -126,6 +176,11 @@ func (board *chessboard) numAttacks() int {
 	return numAttacks
 }
 
+/* attack returns the list of queens that would be attacked by the passed queen
+ * if the passed queen were to attack on the board
+ * @param attackingQueen the proposed queen to attack
+ * @returns a list of queens that were attacked by the attackingQueen
+ */
 func (board *chessboard) attack(attackingQueen *queen) (attackedQueens []*queen) {
 	attackedQueens = make([]*queen, 0)
 
@@ -203,6 +258,9 @@ func (board *chessboard) attack(attackingQueen *queen) (attackedQueens []*queen)
 	return
 }
 
+/* print writes out the chessboard to the given io.Writer
+ * @param output the output writer to write to
+ */
 func (board *chessboard) print(output io.Writer) {
 	const (
 		whiteBackground = "\033[48;5;15m"
